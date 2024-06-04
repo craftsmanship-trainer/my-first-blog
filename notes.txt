@@ -1,0 +1,20 @@
+OBJECTS 
+    - Instance of a class is OBJECTS
+    - Object contains properties & behaviours
+
+CAT 
+    - color, age, mood, owner (VARIABLES)
+    - purr(), scratch(), feed(cat_food) (METHODS)
+
+CATFOOD 
+    - taste
+
+POST
+    - title, text, author, created_date, published_date
+    - publish (method)
+
+Model 
+    - Django is a special kind of Object 
+    - It is saved in the database
+
+    
