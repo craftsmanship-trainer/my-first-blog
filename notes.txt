@@ -17,4 +17,227 @@ Model
     - Django is a special kind of Object 
     - It is saved in the database
 
-    
+
+Django ORM & QuerySets
+    - A QuerySets: A list of objects of given Model
+    - QuerySets allows you to read the data from the database, filter and order it.
+
+
+(myenv) ubuntu@DARK-MATTER:~/django$ python manage.py shell
+Python 3.10.12 (main, Nov 20 2023, 15:14:05) [GCC 11.4.0]
+Type 'copyright', 'credits' or 'license' for more information
+IPython 7.31.1 -- An enhanced Interactive Python. Type '?' for help.
+
+In [1]: Post.objects.all()
+---------------------------------------------------------------------------
+NameError                                 Traceback (most recent call last)
+<ipython-input-1-09ba15aa7345> in <module>
+----> 1 Post.objects.all()
+
+NameError: name 'Post' is not defined
+
+In [2]: from blog.models import Post
+
+In [3]: Post.objects.all()
+Out[3]: <QuerySet [<Post: Django Training>]>
+
+In [4]: Post.objects.create(author=vigensh, title="Django Master", text="Test")
+---------------------------------------------------------------------------
+NameError                                 Traceback (most recent call last)
+<ipython-input-4-2dde82ec413a> in <module>
+----> 1 Post.objects.create(author=vigensh, title="Django Master", text="Test")
+
+NameError: name 'vigensh' is not defined
+
+In [5]: Post.objects.create(author="vigensh", title="Django Master", text="Test")
+---------------------------------------------------------------------------
+ValueError                                Traceback (most recent call last)
+<ipython-input-5-656d9db52054> in <module>
+----> 1 Post.objects.create(author="vigensh", title="Django Master", text="Test")
+
+~/django/myenv/lib/python3.10/site-packages/django/db/models/manager.py in manager_method(self, *args, **kwargs)
+     85             @wraps(method)
+     86             def manager_method(self, *args, **kwargs):
+---> 87                 return getattr(self.get_queryset(), name)(*args, **kwargs)
+     88 
+     89             return manager_method
+
+~/django/myenv/lib/python3.10/site-packages/django/db/models/query.py in create(self, **kwargs)
+    675             )
+    676 
+--> 677         obj = self.model(**kwargs)
+    678         self._for_write = True
+    679         obj.save(force_insert=True, using=self.db)
+
+~/django/myenv/lib/python3.10/site-packages/django/db/models/base.py in __init__(self, *args, **kwargs)
+    541                 # checked) by the RelatedObjectDescriptor.
+    542                 if rel_obj is not _DEFERRED:
+--> 543                     _setattr(self, field.name, rel_obj)
+    544             else:
+    545                 if val is not _DEFERRED:
+
+~/django/myenv/lib/python3.10/site-packages/django/db/models/fields/related_descriptors.py in __set__(self, instance, value)
+    282             value, self.field.remote_field.model._meta.concrete_model
+    283         ):
+--> 284             raise ValueError(
+    285                 'Cannot assign "%r": "%s.%s" must be a "%s" instance.'
+    286                 % (
+
+ValueError: Cannot assign "'vigensh'": "Post.author" must be a "User" instance.
+
+In [6]: Post.objects.create(author=me, title="Django Master", text="Test")
+---------------------------------------------------------------------------
+NameError                                 Traceback (most recent call last)
+<ipython-input-6-4e1c44ed474e> in <module>
+----> 1 Post.objects.create(author=me, title="Django Master", text="Test")
+
+NameError: name 'me' is not defined
+
+In [7]: from django.contrib.auth.models import User
+
+In [8]: Users.objects.all()
+---------------------------------------------------------------------------
+NameError                                 Traceback (most recent call last)
+<ipython-input-8-9a61cc974b48> in <module>
+----> 1 Users.objects.all()
+
+NameError: name 'Users' is not defined
+
+In [9]: User.objects.all()
+Out[9]: <QuerySet [<User: admin>]>
+
+In [10]: vignesh = User.objects.get(username='admin')
+
+In [11]: Post.objects.create(author=vigensh, title="Django Master", text="Test")
+---------------------------------------------------------------------------
+NameError                                 Traceback (most recent call last)
+<ipython-input-11-2dde82ec413a> in <module>
+----> 1 Post.objects.create(author=vigensh, title="Django Master", text="Test")
+
+NameError: name 'vigensh' is not defined
+
+In [12]: Post.objects.create(author=vignesh, title="Django Master", text="Test")
+Out[12]: <Post: Django Master>
+
+In [13]: Post.objects.all()
+Out[13]: <QuerySet [<Post: Django Training>, <Post: Django Master>]>
+
+In [14]: Post.objects.filter(author=vignesh)
+Out[14]: <QuerySet [<Post: Django Training>, <Post: Django Master>]>
+
+In [15]: Post.objects.filter(title_contains='Django Master')
+---------------------------------------------------------------------------
+FieldError                                Traceback (most recent call last)
+<ipython-input-15-2a55ab5f1b37> in <module>
+----> 1 Post.objects.filter(title_contains='Django Master')
+
+~/django/myenv/lib/python3.10/site-packages/django/db/models/manager.py in manager_method(self, *args, **kwargs)
+     85             @wraps(method)
+     86             def manager_method(self, *args, **kwargs):
+---> 87                 return getattr(self.get_queryset(), name)(*args, **kwargs)
+     88 
+     89             return manager_method
+
+~/django/myenv/lib/python3.10/site-packages/django/db/models/query.py in filter(self, *args, **kwargs)
+   1474         """
+   1475         self._not_support_combined_queries("filter")
+-> 1476         return self._filter_or_exclude(False, args, kwargs)
+   1477 
+   1478     def exclude(self, *args, **kwargs):
+
+~/django/myenv/lib/python3.10/site-packages/django/db/models/query.py in _filter_or_exclude(self, negate, args, kwargs)
+   1492             clone._deferred_filter = negate, args, kwargs
+   1493         else:
+-> 1494             clone._filter_or_exclude_inplace(negate, args, kwargs)
+   1495         return clone
+   1496 
+
+~/django/myenv/lib/python3.10/site-packages/django/db/models/query.py in _filter_or_exclude_inplace(self, negate, args, kwargs)
+   1499             self._query.add_q(~Q(*args, **kwargs))
+   1500         else:
+-> 1501             self._query.add_q(Q(*args, **kwargs))
+   1502 
+   1503     def complex_filter(self, filter_obj):
+
+~/django/myenv/lib/python3.10/site-packages/django/db/models/sql/query.py in add_q(self, q_object)
+   1611             a for a in self.alias_map if self.alias_map[a].join_type == INNER
+   1612         }
+-> 1613         clause, _ = self._add_q(q_object, self.used_aliases)
+   1614         if clause:
+   1615             self.where.add(clause, AND)
+
+~/django/myenv/lib/python3.10/site-packages/django/db/models/sql/query.py in _add_q(self, q_object, used_aliases, branch_negated, current_negated, allow_joins, split_subq, check_filterable, summarize, update_join_types)
+   1643         )
+   1644         for child in q_object.children:
+-> 1645             child_clause, needed_inner = self.build_filter(
+   1646                 child,
+   1647                 can_reuse=used_aliases,
+
+~/django/myenv/lib/python3.10/site-packages/django/db/models/sql/query.py in build_filter(self, filter_expr, branch_negated, current_negated, can_reuse, allow_joins, split_subq, check_filterable, summarize, update_join_types)
+   1493         if not arg:
+   1494             raise FieldError("Cannot parse keyword query %r" % arg)
+-> 1495         lookups, parts, reffed_expression = self.solve_lookup_type(arg, summarize)
+   1496 
+   1497         if check_filterable:
+
+~/django/myenv/lib/python3.10/site-packages/django/db/models/sql/query.py in solve_lookup_type(self, lookup, summarize)
+   1305                     expression = Ref(annotation, expression)
+   1306                 return expression_lookups, (), expression
+-> 1307         _, field, _, lookup_parts = self.names_to_path(lookup_splitted, self.get_meta())
+   1308         field_parts = lookup_splitted[0 : len(lookup_splitted) - len(lookup_parts)]
+   1309         if len(lookup_parts) > 1 and not field_parts:
+
+~/django/myenv/lib/python3.10/site-packages/django/db/models/sql/query.py in names_to_path(self, names, opts, allow_many, fail_on_missing)
+   1770                         ]
+   1771                     )
+-> 1772                     raise FieldError(
+   1773                         "Cannot resolve keyword '%s' into field. "
+   1774                         "Choices are: %s" % (name, ", ".join(available))
+
+FieldError: Cannot resolve keyword 'title_contains' into field. Choices are: author, author_id, created_date, id, published_date, text, title
+
+In [16]: Post.objects.filter(title__contains='Django Master')
+Out[16]: <QuerySet [<Post: Django Master>]>
+
+In [17]: from django.utils import timezone
+
+In [18]: Post.objects.filter(published_date__lte=timezone.now())
+Out[18]: <QuerySet [<Post: Django Training>]>
+
+In [19]: post = Post.objects.get(title='Django Master')
+
+In [20]: post.publish()
+
+In [21]: Post.objects.filter(published_date__lte=timezone.now())
+Out[21]: <QuerySet [<Post: Django Training>, <Post: Django Master>]>
+
+In [22]: Post.objets.order_by('created_date')
+---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+<ipython-input-22-547bb510efc9> in <module>
+----> 1 Post.objets.order_by('created_date')
+
+AttributeError: type object 'Post' has no attribute 'objets'
+
+In [23]: Post.objects.order_by('created_date')
+Out[23]: <QuerySet [<Post: Django Training>, <Post: Django Master>]>
+
+In [24]: Post.objects.filter(published_date__lte=timezone.now()).order_by('published_date')
+Out[24]: <QuerySet [<Post: Django Training>, <Post: Django Master>]>
+
+In [25]: exit()
+
+=============
+CSS and Images are Static files
+
+h1 a, h2 a {
+    color: #c25100;
+}
+
+h1 a - Is a CSS selector 
+
+CSS - Class & id are names you give the element by yourself
+Classes define groups of elements
+Ids point to specific element
+
+<a href="https://wikipedia.org/wiki/django" class="external_link" id="link_to wiki_page">
